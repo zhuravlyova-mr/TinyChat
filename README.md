@@ -5,4 +5,4 @@ Server takes a port number as a command line argument. Client takes a port numbe
 One server can process many clients requests. 
 Messages are sent in json format. A few message types are used for exchange of information.
 There is a json parser - parser.h - that is used to parse and unparse messages that are sent and recevied.
-Mixed С/С++ code is used in programs.
+Mixed С/С++ code is used in programs (included string & string.h - must be rewritten).
