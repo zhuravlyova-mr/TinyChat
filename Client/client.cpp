@@ -1,6 +1,8 @@
 //Microsoft Visual Studio 2017 (v141)
 //CLient
 //Command args: <port> <IP-address>
+//logins and passwords: { { "bob", "123" }, { "paul", "456" }, { "jim", "diam01" }, { "storm", "qw123" }, { "guest", "passw" } };
+
 #define _CRT_SECURE_NO_WARNINGS
 #define _WINSOCK_DEPRECATED_NO_WARNINGS
 #include <winsock2.h>
@@ -83,7 +85,7 @@ DWORD WINAPI from_server(PVOID arg) {
 		int numbytes = recv(cli_sock, msg, MSG, 0);
 
 		if (!numbytes or numbytes == SOCKET_ERROR) {
-			cout << "\nÑlient leaves (may be server not found).\n";
+			cout << "\nÃ‘lient leaves (may be server not found).\n";
 			CloseHandle(thr);
 			closesocket(cli_sock);
 			break;
