@@ -7,6 +7,7 @@
 #include <winsock2.h>
 #include <windows.h>
 #include "parser.h"
+#include <cassert>
 
 #pragma comment(lib,"ws2_32.lib") 
 
@@ -29,7 +30,8 @@ TinyParser sender;
 HANDLE thr[VMAX] = { nullptr };  //clients threads handles
 HANDLE sender_thr[VMAX] = { nullptr };  //clients threads handles
 HANDLE sem;
-vector<pair<string, string>> LogsPassws = { { "bob", "123" }, { "paul", "456" }, { "jim", "diam01" }, { "storm", "qw123" }, { "guest", "passw" } };
+vector<pair<string, string>> LogsPassws = { { "\"bob\"", "\"123\"" }, { "\"paul\"", "\"456\"" },
+											{ "\"jim\"", "\"diam01\"" }, { "\"storm\"", "\"qw123\"" }, { "\"guest\"", "\"passw\"" } };
 
 vector<pair<string, string>> make_answer(int port, char* msg, int socket) {
 
@@ -57,7 +59,7 @@ vector<pair<string, string>> make_answer(int port, char* msg, int socket) {
 
 		if (flag_auth) {
 			reply.push_back({ "\"status\"", "\"ok\"" });
-			reply.push_back({ "\"session\"", to_string(port) + to_string(socket) });
+			reply.push_back({ "\"session\"", "\"" + to_string(port) + to_string(socket) + "\"" });
 		}
 		else {
 			reply.push_back({ "\"status\"", "\"failed\"" });
@@ -69,12 +71,12 @@ vector<pair<string, string>> make_answer(int port, char* msg, int socket) {
 		if (flag_auth) {
 			reply.push_back({ "\"command\"", "\"message_reply\"" });
 			reply.push_back({ "\"status\"", "\"ok\"" });
-			reply.push_back({ "\"client_id\"", to_string(client_id) });
+			reply.push_back({ "\"client_id\"", "\"" + to_string(client_id) + "\"" });
 		}
 		else {
 			reply.push_back({ "\"command\"", "\"message_reply\"" });
 			reply.push_back({ "\"status\"", "\"failed\"" });
-			reply.push_back({ "\"message\"", "Authentication is not passed yet." });
+			reply.push_back({ "\"message\"", "\"Authentication is not passed yet.\"" });
 		}
 	}
 	else if (message[1].second == "\"ping\"") {
@@ -85,7 +87,7 @@ vector<pair<string, string>> make_answer(int port, char* msg, int socket) {
 		else {
 			reply.push_back({ "\"command\"", "\"ping_reply\"" });
 			reply.push_back({ "\"status\"", "\"failed\"" });
-			reply.push_back({ "\"message\"", "Authentication is not passed yet." });
+			reply.push_back({ "\"message\"", "\"Authentication is not passed yet.\"" });
 		}
 	}
 
@@ -177,6 +179,7 @@ int start_work(int argc, char* argv[]) {
 	WSACleanup();
 	return 0;
 }
+
 
 int main(int argc, char *argv[]) {
 
