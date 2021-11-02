@@ -6,3 +6,4 @@ One server can process many clients requests.
 Messages are sent in json format. A few message types are used for chatting. 
 There is a json parser - parser.h - that is used to parse and unparse messages that are sent and recevied. 
 Mixed С/С++ code is used in programs (included string & string.h - must be rewritten). 
+You can use one server and up to 20 clients.
