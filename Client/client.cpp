@@ -1,8 +1,6 @@
 //Microsoft Visual Studio 2017 (v141)
 //CLient
 //Command args: <port> <IP-address>
-//logins and passwords: { { "bob", "123" }, { "paul", "456" }, { "jim", "diam01" }, { "storm", "qw123" }, { "guest", "passw" } };
-
 #define _CRT_SECURE_NO_WARNINGS
 #define _WINSOCK_DEPRECATED_NO_WARNINGS
 #include <winsock2.h>
@@ -17,7 +15,7 @@ using namespace std;
 
 SOCKET cli_sock;
 
-HANDLE thr, Repl; //thread handle, mutex for output handle
+HANDLE thr; //thread handle
 DWORD thrID;
 
 string uuid, login;
@@ -25,13 +23,13 @@ TinyParser d;
 TinyParser sender;
 DWORD client_id;
 DWORD id;
+int flag; //is_logout
 
 vector<pair<string, string>> make_message(int port, int& flag) {
 
 	string str, str1, str2;
 	vector<pair<string, string>> message;
 	message.clear();
-	flag = 0;
 	cin >> str;
 	message.push_back({ "\"id\"", to_string(cli_sock) + to_string(thrID) });
 	if (str == "HELLO") {
@@ -41,26 +39,26 @@ vector<pair<string, string>> make_message(int port, int& flag) {
 		message.push_back({ "\"command\"", "\"login\"" });
 		cout << "login: ";
 		cin >> login;
-		message.push_back({ "\"login\"", login });
+		message.push_back({ "\"login\"", "\"" + login + "\"" });
 		cout << "password: ";
 		cin >> str1;
-		message.push_back({ "\"password\"", str1 });
+		message.push_back({ "\"password\"", "\"" + str1 + "\"" });
 	}
 	else if (str == "message") {
 		message.push_back({ "\"command\"", "\"message\"" });
 		cout << "body: ";
 		cin >> str2;
 		message.push_back({ "\"body\"", str2 });
-		message.push_back({ "\"sender_login\"", login });
+		message.push_back({ "\"sender_login\"", "\"" + login + "\"" });
 		message.push_back({ "\"session\"", uuid });
 	}
 	else if (str == "ping") {
 		message.push_back({ "\"command\"", "\"ping\"" });
-		message.push_back({ "\"session\"", "\"" + uuid + "\"" });
+		message.push_back({ "\"session\"", uuid });
 	}
 	else if (str == "logout") {
 		message.push_back({ "\"command\"", "\"logout\"" });
-		message.push_back({ "\"session\"", "\"" + to_string(cli_sock) + to_string(thrID) + to_string(port) + "\"" });
+		message.push_back({ "\"session\"", uuid });
 		flag = 1;
 	}
 	else {
@@ -85,7 +83,7 @@ DWORD WINAPI from_server(PVOID arg) {
 		int numbytes = recv(cli_sock, msg, MSG, 0);
 
 		if (!numbytes or numbytes == SOCKET_ERROR) {
-			cout << "\nÃ‘lient leaves (may be server not found).\n";
+			cout << "\nÑlient leaves (may be server not found).\n";
 			CloseHandle(thr);
 			closesocket(cli_sock);
 			break;
@@ -98,6 +96,7 @@ DWORD WINAPI from_server(PVOID arg) {
 				uuid = message[3].second; session = 1;
 			}
 			cout << msg << "\n";
+			if (flag) break;
 			cout << "command: ";
 		}
 	}
@@ -113,7 +112,7 @@ int start_client(int argc, char* argv[]) {
 	int last_len = MSG;
 	WSAStartup(MAKEWORD(2, 2), &ws);
 	int port = atoi(argv[1]);
-	uuid = argv[1];
+	uuid = "\"\"";
 	login = "\"\"";
 	memset(&addr, 0, sizeof(addr));
 
@@ -128,12 +127,12 @@ int start_client(int argc, char* argv[]) {
 	thr = CreateThread(NULL, 0, from_server, NULL, 0, &thrID);
 	cout << "Client " << to_string(cli_sock) + to_string(thrID) << "\n";
 
-	int res = 0, flag;
+	int res = 0;
+	client_id = 0;
 
 	while (1) {
 		try {
 			sender = make_message(port, flag);
-			if (flag) break;
 			mess = sender.UnParse();
 			if (mess == nullptr) {
 				cout << "\ncommand: ";
@@ -142,6 +141,7 @@ int start_client(int argc, char* argv[]) {
 			last_len = strlen(mess);
 			send(cli_sock, mess, last_len, 0);
 			++client_id;
+			if (WaitForSingleObject(thr, 1) == WAIT_OBJECT_0) break; //when logout thread becomes signaled
 		}
 		catch (...) {
 			cout << "Unknown command\n";

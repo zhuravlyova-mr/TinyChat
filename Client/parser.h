@@ -20,6 +20,10 @@ public:
 		str = new char[MSG];
 	}
 
+	TinyParser(char* str) {
+		Parse(str);
+	}
+
 	TinyParser& operator=(vector<pair<string, string>> _data) {
 
 		data.clear();
@@ -68,9 +72,6 @@ public:
 		return str;
 	}
 
-	TinyParser(char* str) {
-		Parse(str);
-	}
 	~TinyParser() {
 		delete(str);
 	}
