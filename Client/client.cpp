@@ -23,7 +23,6 @@
 
 //For more information, please refer to <http://unlicense.org/>
 
-//Microsoft Visual Studio 2017 (v141)
 //CLient
 //Command args: <port> <IP-address>
 #define _CRT_SECURE_NO_WARNINGS
