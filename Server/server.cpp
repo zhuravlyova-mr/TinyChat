@@ -23,7 +23,6 @@
 
 //For more information, please refer to <http://unlicense.org/>
 
-//Microsoft Visual Studio 2017 (v141)
 //Server
 //Command args: <port>
 
