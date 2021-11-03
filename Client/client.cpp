@@ -146,7 +146,12 @@ int start_client(int argc, char* argv[]) {
 
 	cli_sock = socket(AF_INET, SOCK_STREAM, 0);
 
-	connect(cli_sock, (struct sockaddr *)&addr, sizeof(addr));
+	if ( (connect(cli_sock, (struct sockaddr *)&addr, sizeof(addr))) != 0) {
+        cout << "Server not found\n";
+        shutdown(cli_sock, 2);
+        return 0;
+	}
+
 
 	thr = CreateThread(NULL, 0, from_server, NULL, 0, &thrID);
 	cout << "Client " << to_string(cli_sock) + to_string(thrID) << "\n";
