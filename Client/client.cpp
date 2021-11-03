@@ -107,7 +107,7 @@ DWORD WINAPI from_server(PVOID arg) {
 		int numbytes = recv(cli_sock, msg, MSG, 0);
 
 		if (!numbytes or numbytes == SOCKET_ERROR) {
-			cout << "\nÑlient leaves (may be server not found).\n";
+			cout << "\nClient leaves (may be server not found).\n";
 			CloseHandle(thr);
 			closesocket(cli_sock);
 			break;
