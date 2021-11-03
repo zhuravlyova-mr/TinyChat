@@ -120,7 +120,10 @@ DWORD WINAPI from_server(PVOID arg) {
 				uuid = message[3].second; session = 1;
 			}
 			cout << msg << "\n";
-			if (flag) break;
+			if (flag) {
+				closesocket(cli_sock);
+				break;
+			}
 			cout << "command: ";
 		}
 	}
@@ -146,10 +149,10 @@ int start_client(int argc, char* argv[]) {
 
 	cli_sock = socket(AF_INET, SOCK_STREAM, 0);
 
-	if ( (connect(cli_sock, (struct sockaddr *)&addr, sizeof(addr))) != 0) {
-        cout << "Server not found\n";
-        shutdown(cli_sock, 2);
-        return 0;
+	if ((connect(cli_sock, (struct sockaddr *)&addr, sizeof(addr))) != 0) {
+		cout << "Server not found\n";
+		shutdown(cli_sock, 2);
+		return 0;
 	}
 
 
@@ -160,26 +163,19 @@ int start_client(int argc, char* argv[]) {
 	client_id = 0;
 
 	while (1) {
-		try {
-			sender = make_message(port, flag);
-			mess = sender.UnParse();
-			if (mess == nullptr) {
-				cout << "\ncommand: ";
-				continue;
-			}
-			last_len = strlen(mess);
-			send(cli_sock, mess, last_len, 0);
-			++client_id;
-			if (WaitForSingleObject(thr, 1) == WAIT_OBJECT_0) break; //when logout thread becomes signaled
+		if (WaitForSingleObject(thr, 1) == WAIT_OBJECT_0) break; //when logout thread becomes signaled
+		sender = make_message(port, flag);
+		mess = sender.UnParse();
+		if (mess == nullptr) {
+			cout << "\ncommand: ";
+			continue;
 		}
-		catch (...) {
-			cout << "Unknown command\n";
-		}
+		last_len = strlen(mess);
+		send(cli_sock, mess, last_len, 0);
+		++client_id;
 	}
-	shutdown(cli_sock, 2);
 	WSACleanup();
 	fflush(stdin);
-	getchar();
 	return 0;
 }
 
